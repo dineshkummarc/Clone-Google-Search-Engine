@@ -206,7 +206,7 @@ function crawl($url)
 	$crawler->enableCookieHandling(true); 
 	$crawler->obeyRobotsTxt(false);
 	$crawler->obeyNoFollowTags(true);
-	$crawler->setUserAgentString( SITE_NAME.' ('.BASE_URL.'/about.php)');
+	$crawler->setUserAgentString( "Test Search Engine 1.0");
 	/*
 		0 - The crawler will follow EVERY link, even if the link leads to a different host or domain.
 			If you choose this mode, you really should set a limit to the crawling-process (see limit-options),
@@ -224,10 +224,10 @@ function crawl($url)
 			E.g. if the root-url is "http://www.foo.com/bar/index.html", the crawler will follow links to "http://www.foo.com/bar/page.html" and
 			"http://www.foo.com/bar/path/index.html", but not links to "http://www.foo.com/page.html". 
 	*/
-	$crawler->setFollowMode(1); 
+	$crawler->setFollowMode(0); 
 	$crawler->setFollowRedirects(true);
 	$crawler->setFollowRedirectsTillContent(true);
-	$crawler->setRequestLimit(3, true);
+	$crawler->setRequestLimit(0, true);
 	//$crawler->setPageLimit(1);
 	$crawler->setUrlCacheType(PHPCrawlerUrlCacheTypes::URLCACHE_SQLITE);
 	$crawler->setWorkingDirectory("tmp/");
