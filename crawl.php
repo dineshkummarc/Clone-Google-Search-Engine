@@ -10,7 +10,7 @@ include('classes/DomDocumentParser.php');
  *	Added simple_html_dom which will be intially used as secondry parser until primary dom parser is fully replaced.
  *	Added PHPCrawl Library will be used as primary crawler for future versions.
  */
-include_once("clases/simple_html_dom.php");
+include_once("classes/simple_html_dom.php");
 include_once("lib/PHPCrawl/libs/PHPCrawler.class.php");
 
 $alreadyCrawled = array();
@@ -21,9 +21,11 @@ $alreadyFoundImages = array();
  *
  */
 class HLCrawler extends PHPCrawler
-{
+{	
 	public function handleDocumentInfo(PHPCrawlerDocumentInfo $p)
 	{
+		global $con;
+		
 		// Just detect linebreak for output ("\n" in CLI-mode, otherwise "<br>").
 		if (PHP_SAPI == "cli") $lb = "\n";
 		else $lb = "<br />";
@@ -276,10 +278,11 @@ function addURL($url, $meta_info){
 			$meta_info_cleaned['meta_og_lon'] = 0;
 		}
 		
-		//var_dump($meta_info_cleaned);
+		var_dump($meta_info_cleaned);
 		if (!linkExists($url)) {
 			
-			$query = $con->prepare("INSERT INTO search_index(meta_title, url, meta_desc, meta_og_locale, meta_og_type, meta_og_title, meta_og_desc', meta_og_site_name, meta_og_lat, meta_og_lon, meta_og_st_ad, meta_og_loc, meta_og_region, meta_og_post_c, meta_og_country, date_crawled) VALUES (':meta_title', ':url', ':meta_desc', ':meta_og_locale', ':meta_og_type', ':meta_og_title', ':meta_og_desc', ':meta_og_site_name', ':meta_og_lat', ':meta_og_lon', ':meta_og_st_ad', ':meta_og_loc', ':meta_og_region', ':meta_og_post_c', ':meta_og_country', :date_crawled)");
+			$query = $con->prepare("INSERT INTO search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0, 50)."', url = '".$url."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."', date_crawled=NOW()");
+			/*
 			$query->bindParam(":meta_title", getExcerpt($meta_info_cleaned['meta_title'],0, 50));
 			$query->bindParam(":url", $url);
 			$query->bindParam(":meta_desc", getExcerpt($meta_info_cleaned['meta_desc'],0, 200));
@@ -295,12 +298,17 @@ function addURL($url, $meta_info){
 			$query->bindParam(":meta_og_region", $meta_info_cleaned['meta_og_region']);
 			$query->bindParam(":meta_og_post_c", $meta_info_cleaned['meta_og_post_c']);
 			$query->bindParam(":meta_og_country", $meta_info_cleaned['meta_og_country']);
-			$query->bindParam(":date_crawled", 'NOW()');
+			//$query->bindParam(":date_crawled", 'NOW()');*/
 			$query->execute();
 
         } else {
 			
-			$query = $con->prepare("UPDATE search_index(meta_title, url, meta_desc, meta_og_locale, meta_og_type, meta_og_title, meta_og_desc', meta_og_site_name, meta_og_lat, meta_og_lon, meta_og_st_ad, meta_og_loc, meta_og_region, meta_og_post_c, meta_og_country, date_crawled) VALUES (':meta_title', ':url', ':meta_desc', ':meta_og_locale', ':meta_og_type', ':meta_og_title', ':meta_og_desc', ':meta_og_site_name', ':meta_og_lat', ':meta_og_lon', ':meta_og_st_ad', ':meta_og_loc', ':meta_og_region', ':meta_og_post_c', ':meta_og_country', :date_crawled) WHERE url=':url'");
+			//$query = $con->prepare("UPDATE search_index(meta_title, url, meta_desc, meta_og_locale, meta_og_type, meta_og_title, meta_og_desc', meta_og_site_name, meta_og_lat, meta_og_lon, meta_og_st_ad, meta_og_loc, meta_og_region, meta_og_post_c, meta_og_country, date_crawled) VALUES (':meta_title', ':url', ':meta_desc', ':meta_og_locale', ':meta_og_type', ':meta_og_title', ':meta_og_desc', ':meta_og_site_name', ':meta_og_lat', ':meta_og_lon', ':meta_og_st_ad', ':meta_og_loc', ':meta_og_region', ':meta_og_post_c', ':meta_og_country', :date_crawled) WHERE url=':url'");
+			
+			$query = $con->prepare("UPDATE search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0,50)."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."' WHERE url = '".$url."'");
+			
+			
+			/*
 			$query->bindParam(":meta_title", getExcerpt($meta_info_cleaned['meta_title'],0, 50));
 			$query->bindParam(":url", $url);
 			$query->bindParam(":meta_desc", getExcerpt($meta_info_cleaned['meta_desc'],0, 200));
@@ -317,6 +325,7 @@ function addURL($url, $meta_info){
 			$query->bindParam(":meta_og_post_c", $meta_info_cleaned['meta_og_post_c']);
 			$query->bindParam(":meta_og_country", $meta_info_cleaned['meta_og_country']);
 			$query->bindParam(":date_crawled", 'NOW()');
+			*/
 			$query->execute();
         }
 	}
@@ -453,8 +462,7 @@ if(isset($_POST['url'])){
 }*/
 
 global $con;
-$query = $con->prepare("SELECT * FROM user_submitted_urls WHERE is_crawled != ':is_crawled'"); 
-$query->bindParam(":is_crawled", 0);
+$query = $con->prepare("SELECT * FROM user_submitted_urls WHERE is_crawled != '1'"); 
 $query->execute();
 if($query->rowCount() != 0){
 	while($row=$query->fetch(PDO::FETCH_OBJ)) {
