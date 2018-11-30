@@ -1,4 +1,5 @@
 <?php
+set_time_limit(0);
 DEFINE ('MAX_FILE_SIZE', 100000000);
 # Do not crawl pages that are already crawled within 14 days. 
 # This is just a security check to ensure our crawler don't visit the same page within specified number of days.
@@ -155,7 +156,7 @@ class HLCrawler extends PHPCrawler
 					$meta_info['meta_title'] = $meta_title->innertext;
 					unset($meta_title);
 				}
-				
+				//var_dump($html);
 				$html->clear();
 				unset($html);
 				
@@ -175,6 +176,7 @@ class HLCrawler extends PHPCrawler
 						else{
 							// Existing Site
 							// Add URL if older than 14 days
+							
 							while ($last_date_crawled_result = $last_date_crawled->fetch(PDO::FETCH_OBJ)){
 								if (strtotime($last_date_crawled_result->last_date_crawled) < strtotime('-'.DAYS_OLD.' days')){
 									addURL($url, $meta_info);
@@ -204,31 +206,14 @@ function crawl($url)
 		//$crawler->setTrafficLimit(2000 * 1024);
 	}
 	$crawler->enableCookieHandling(true); 
+	#$crawler->setTrafficLimit(0); 
 	$crawler->obeyRobotsTxt(false);
-	$crawler->obeyNoFollowTags(true);
-	$crawler->setUserAgentString( "Test Search Engine 1.0");
-	/*
-		0 - The crawler will follow EVERY link, even if the link leads to a different host or domain.
-			If you choose this mode, you really should set a limit to the crawling-process (see limit-options),
-			otherwise the crawler maybe will crawl the whole WWW!
-
-		1 - The crawler only follow links that lead to the same domain like the one in the root-url.
-			E.g. if the root-url (setURL()) is "http://www.foo.com", the crawler will follow links to "http://www.foo.com/..."
-			and "http://bar.foo.com/...", but not to "http://www.another-domain.com/...".
-
-		2 - The crawler will only follow links that lead to the same host like the one in the root-url.
-			E.g. if the root-url (setURL()) is "http://www.foo.com", the crawler will ONLY follow links to "http://www.foo.com/...", but not
-			to "http://bar.foo.com/..." and "http://www.another-domain.com/...". This is the default mode.
-
-		3 - The crawler only follows links to pages or files located in or under the same path like the one of the root-url.
-			E.g. if the root-url is "http://www.foo.com/bar/index.html", the crawler will follow links to "http://www.foo.com/bar/page.html" and
-			"http://www.foo.com/bar/path/index.html", but not links to "http://www.foo.com/page.html". 
-	*/
-	$crawler->setFollowMode(0); 
-	$crawler->setFollowRedirects(true);
-	$crawler->setFollowRedirectsTillContent(true);
-	$crawler->setRequestLimit(0, true);
-	//$crawler->setPageLimit(1);
+	$crawler->obeyNoFollowTags(false);
+	$crawler->setUserAgentString( "Test Crawler V1.0");
+	$crawler->setFollowMode(0);
+	#$crawler->setFollowRedirects(true);
+	#$crawler->setFollowRedirectsTillContent(true);
+	//$crawler->setRequestLimit(0, false);
 	$crawler->setUrlCacheType(PHPCrawlerUrlCacheTypes::URLCACHE_SQLITE);
 	$crawler->setWorkingDirectory("tmp/");
 	$crawler->go();
@@ -278,54 +263,20 @@ function addURL($url, $meta_info){
 			$meta_info_cleaned['meta_og_lon'] = 0;
 		}
 		
-		var_dump($meta_info_cleaned);
+		//var_dump($meta_info_cleaned);
 		if (!linkExists($url)) {
 			
 			$query = $con->prepare("INSERT INTO search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0, 50)."', url = '".$url."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."', date_crawled=NOW()");
-			/*
-			$query->bindParam(":meta_title", getExcerpt($meta_info_cleaned['meta_title'],0, 50));
-			$query->bindParam(":url", $url);
-			$query->bindParam(":meta_desc", getExcerpt($meta_info_cleaned['meta_desc'],0, 200));
-			$query->bindParam(":meta_og_locale", $meta_info_cleaned['meta_og_locale']);
-			$query->bindParam(":meta_og_type", $meta_info_cleaned['meta_og_type']);
-			$query->bindParam(":meta_og_title", $meta_info_cleaned['meta_og_title']);
-			$query->bindParam(":meta_og_desc", getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200));
-			$query->bindParam(":meta_og_site_name", $meta_info_cleaned['meta_og_site_name']);
-			$query->bindParam(":meta_og_lat", $meta_info_cleaned['meta_og_lat']);
-			$query->bindParam(":meta_og_lon", $meta_info_cleaned['meta_og_lon']);
-			$query->bindParam(":meta_og_st_ad", $meta_info_cleaned['meta_og_st_ad']);
-			$query->bindParam(":meta_og_loc", $meta_info_cleaned['meta_og_loc']);
-			$query->bindParam(":meta_og_region", $meta_info_cleaned['meta_og_region']);
-			$query->bindParam(":meta_og_post_c", $meta_info_cleaned['meta_og_post_c']);
-			$query->bindParam(":meta_og_country", $meta_info_cleaned['meta_og_country']);
-			//$query->bindParam(":date_crawled", 'NOW()');*/
+		
 			$query->execute();
 
         } else {
 			
-			//$query = $con->prepare("UPDATE search_index(meta_title, url, meta_desc, meta_og_locale, meta_og_type, meta_og_title, meta_og_desc', meta_og_site_name, meta_og_lat, meta_og_lon, meta_og_st_ad, meta_og_loc, meta_og_region, meta_og_post_c, meta_og_country, date_crawled) VALUES (':meta_title', ':url', ':meta_desc', ':meta_og_locale', ':meta_og_type', ':meta_og_title', ':meta_og_desc', ':meta_og_site_name', ':meta_og_lat', ':meta_og_lon', ':meta_og_st_ad', ':meta_og_loc', ':meta_og_region', ':meta_og_post_c', ':meta_og_country', :date_crawled) WHERE url=':url'");
 			
 			$query = $con->prepare("UPDATE search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0,50)."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."' WHERE url = '".$url."'");
 			
 			
-			/*
-			$query->bindParam(":meta_title", getExcerpt($meta_info_cleaned['meta_title'],0, 50));
-			$query->bindParam(":url", $url);
-			$query->bindParam(":meta_desc", getExcerpt($meta_info_cleaned['meta_desc'],0, 200));
-			$query->bindParam(":meta_og_locale", $meta_info_cleaned['meta_og_locale']);
-			$query->bindParam(":meta_og_type", $meta_info_cleaned['meta_og_type']);
-			$query->bindParam(":meta_og_title", $meta_info_cleaned['meta_og_title']);
-			$query->bindParam(":meta_og_desc", getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200));
-			$query->bindParam(":meta_og_site_name", $meta_info_cleaned['meta_og_site_name']);
-			$query->bindParam(":meta_og_lat", $meta_info_cleaned['meta_og_lat']);
-			$query->bindParam(":meta_og_lon", $meta_info_cleaned['meta_og_lon']);
-			$query->bindParam(":meta_og_st_ad", $meta_info_cleaned['meta_og_st_ad']);
-			$query->bindParam(":meta_og_loc", $meta_info_cleaned['meta_og_loc']);
-			$query->bindParam(":meta_og_region", $meta_info_cleaned['meta_og_region']);
-			$query->bindParam(":meta_og_post_c", $meta_info_cleaned['meta_og_post_c']);
-			$query->bindParam(":meta_og_country", $meta_info_cleaned['meta_og_country']);
-			$query->bindParam(":date_crawled", 'NOW()');
-			*/
+			
 			$query->execute();
         }
 	}
@@ -335,7 +286,7 @@ function addURL($url, $meta_info){
 }
 function linkExists($url){
     global $con;
-    $query = $con->prepare("SELECT * FROM sites WHERE url = :url"); //
+    $query = $con->prepare("SELECT * FROM search_index WHERE url = :url"); //
     $query->bindParam(":url", $url);
     $query->execute();
     return $query->rowCount() != 0;
@@ -472,11 +423,15 @@ if($query->rowCount() != 0){
 		
 		if($last_date_crawled->rowCount() == 0){
 			// New URL
+			//echo $row->url;
 			crawl($row->url);
+			
 		}
 		else{
+			
 			// Existing Site
 			// Crawl if older than 14 days
+			
 			while ($last_date_crawled_result = $last_date_crawled->fetch(PDO::FETCH_OBJ)){
 				if (strtotime($last_date_crawled_result->last_date_crawled) < strtotime('-'.DAYS_OLD.' days')){
 					crawl($row->url);
