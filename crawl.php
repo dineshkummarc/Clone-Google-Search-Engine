@@ -1,5 +1,8 @@
 <?php
-define('MAX_FILE_SIZE', 100000000);
+DEFINE ('MAX_FILE_SIZE', 100000000);
+# Do not crawl pages that are already crawled within 14 days. 
+# This is just a security check to ensure our crawler don't visit the same page within specified number of days.
+DEFINE ('DAYS_OLD', '14'); 
 
 include("config.php");
 include('classes/DomDocumentParser.php');
@@ -154,8 +157,31 @@ class HLCrawler extends PHPCrawler
 				$html->clear();
 				unset($html);
 				
-				if(isset($url)){
-					addURL($url, $meta_info);
+				if(isset($url)){ // if url is set
+					if(!in_array($url, $alreadyCrawled)){ // Check if its a new URL
+						$alreadyCrawled[] = $url;
+						//$crawling = $url; // Do not need this.
+						
+						
+						$last_date_crawled = $con->prepare("SELECT id, last_date_crawled, hash FROM search_index WHERE url = '".$url."' ORDER BY last_date_crawled DESC LIMIT 1"); 
+						$last_date_crawled->execute();
+						
+						if($last_date_crawled->rowCount() == 0){
+							// Add New URL
+							addURL($url, $meta_info);
+						}
+						else{
+							// Existing Site
+							// Add URL if older than 14 days
+							while ($last_date_crawled_result = $last_date_crawled->fetch(PDO::FETCH_OBJ)){
+								if (strtotime($last_date_crawled_result->last_date_crawled) < strtotime('-'.DAYS_OLD.' days')){
+									addURL($url, $meta_info);
+								}
+							}
+						}
+						
+					} 
+					
 				}
 				
 				
@@ -179,10 +205,27 @@ function crawl($url)
 	$crawler->obeyRobotsTxt(false);
 	$crawler->obeyNoFollowTags(true);
 	$crawler->setUserAgentString( SITE_NAME.' ('.BASE_URL.'/about.php)');
-	$crawler->setFollowMode(1);
+	/*
+		0 - The crawler will follow EVERY link, even if the link leads to a different host or domain.
+			If you choose this mode, you really should set a limit to the crawling-process (see limit-options),
+			otherwise the crawler maybe will crawl the whole WWW!
+
+		1 - The crawler only follow links that lead to the same domain like the one in the root-url.
+			E.g. if the root-url (setURL()) is "http://www.foo.com", the crawler will follow links to "http://www.foo.com/..."
+			and "http://bar.foo.com/...", but not to "http://www.another-domain.com/...".
+
+		2 - The crawler will only follow links that lead to the same host like the one in the root-url.
+			E.g. if the root-url (setURL()) is "http://www.foo.com", the crawler will ONLY follow links to "http://www.foo.com/...", but not
+			to "http://bar.foo.com/..." and "http://www.another-domain.com/...". This is the default mode.
+
+		3 - The crawler only follows links to pages or files located in or under the same path like the one of the root-url.
+			E.g. if the root-url is "http://www.foo.com/bar/index.html", the crawler will follow links to "http://www.foo.com/bar/page.html" and
+			"http://www.foo.com/bar/path/index.html", but not links to "http://www.foo.com/page.html". 
+	*/
+	$crawler->setFollowMode(1); 
 	$crawler->setFollowRedirects(true);
 	$crawler->setFollowRedirectsTillContent(true);
-	$crawler->setRequestLimit(1, true);
+	$crawler->setRequestLimit(3, true);
 	//$crawler->setPageLimit(1);
 	$crawler->setUrlCacheType(PHPCrawlerUrlCacheTypes::URLCACHE_SQLITE);
 	$crawler->setWorkingDirectory("tmp/");
@@ -415,7 +458,23 @@ $query->bindParam(":is_crawled", 0);
 $query->execute();
 if($query->rowCount() != 0){
 	while($row=$query->fetch(PDO::FETCH_OBJ)) {
-        crawl($row->url);
+		
+		$last_date_crawled = $con->prepare("SELECT id, last_date_crawled, hash FROM search_index WHERE url = '".$row->url."' ORDER BY last_date_crawled DESC LIMIT 1"); 
+		$last_date_crawled->execute();
+		
+		if($last_date_crawled->rowCount() == 0){
+			// New URL
+			crawl($row->url);
+		}
+		else{
+			// Existing Site
+			// Crawl if older than 14 days
+			while ($last_date_crawled_result = $last_date_crawled->fetch(PDO::FETCH_OBJ)){
+				if (strtotime($last_date_crawled_result->last_date_crawled) < strtotime('-'.DAYS_OLD.' days')){
+					crawl($row->url);
+				}
+			}
+		}
     }
 }
 else{
