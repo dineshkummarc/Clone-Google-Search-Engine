@@ -157,8 +157,22 @@ class HLCrawler extends PHPCrawler
 					unset($meta_title);
 				}
 				
-				
-				
+				//===============================
+				$imageArray = $html->find('img');
+				foreach ($imageArray as $image){
+					$src = $image->{'src'};
+					$alt = $image->{'alt'};
+					$title = $image->{'title'};
+					if(!$title && !$alt){
+						continue;
+					}
+					$src = createLink($src, $url);
+					if(!in_array($src, $alreadyFoundImages)){
+						$alreadyFoundImages[] = $src;
+						insertImage($url, $src, $alt, $title);
+					}
+				}
+				//===============================
 				//var_dump($html);
 				$html->clear();
 				unset($html);
@@ -314,11 +328,23 @@ function insertLink($url, $title, $description, $keywords){
 }
 function insertImage($url, $src, $alt, $title){
     global $con;
-    $query = $con->prepare("INSERT INTO images(siteUrl, imageUrl, alt, title) VALUES (:siteUrl, :imageUrl, :alt, :title)");
-    $query->bindParam(":siteUrl", $url);
-    $query->bindParam(":imageUrl", $src);
-    $query->bindParam(":alt", $alt);
+	if(!isset($url) || $url===""){
+		$url="no-url";
+    }
+    if(!isset($title) || $title===""){
+        $title="no-title";
+    }
+    if(!isset($src) || $src===""){
+        $src="no-src";
+    }
+    if(!isset($alt) || $alt===""){
+        $alt="no-alt";
+    }
+    $query = $con->prepare("INSERT INTO image_search_index(site_url, image_url, title, alt) VALUES (:site_url, :image_url, :title, :alt)");
+    $query->bindParam(":site_url", $url);
+    $query->bindParam(":image_url", $src);
     $query->bindParam(":title", $title);
+    $query->bindParam(":alt", $alt);
     return $query->execute();
 }
 function createLink($src, $url) {

@@ -8,7 +8,7 @@ $alreadyFoundImages = array();
 if(isset($_POST['url'])){
     $start_url = $_POST['url'];
     insertLink($start_url);
-    //followLinks($start_url);
+    followLinks($start_url); # Enable this line if you want to process the given url building link list to be used as feed for crawler. This can be usefull if you don't want to skip any link provided in the provided website.
 }
 
 function linkExists($url){
