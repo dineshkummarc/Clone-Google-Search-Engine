@@ -156,6 +156,9 @@ class HLCrawler extends PHPCrawler
 					$meta_info['meta_title'] = $meta_title->innertext;
 					unset($meta_title);
 				}
+				
+				
+				
 				//var_dump($html);
 				$html->clear();
 				unset($html);
@@ -197,6 +200,13 @@ class HLCrawler extends PHPCrawler
 
 function crawl($url)
 {
+	if (!is_dir('tmp'))
+	{
+		$oldmask = umask(0);
+		mkdir("tmp", 0777);
+		umask($oldmask);
+	}
+	
 	echo "Crawl Started: ".$url." \n";
 	$crawler = new HLCrawler();
 	$crawler->setURL($url);
@@ -211,11 +221,13 @@ function crawl($url)
 	$crawler->obeyNoFollowTags(false);
 	$crawler->setUserAgentString( "Test Crawler V1.0");
 	$crawler->setFollowMode(0);
-	#$crawler->setFollowRedirects(true);
-	#$crawler->setFollowRedirectsTillContent(true);
-	//$crawler->setRequestLimit(0, false);
+	$crawler->setCrawlingDepthLimit(25); // New Pram
+	//$crawler->goMultiProcessed(5, PHPCrawlerMultiProcessModes::MPMODE_PARENT_EXECUTES_USERCODE);  # Enable when you have PHP pcntl extension
+	$crawler->setFollowRedirects(true);
+	$crawler->setFollowRedirectsTillContent(true);
+	$crawler->setRequestLimit(0, false);
 	$crawler->setUrlCacheType(PHPCrawlerUrlCacheTypes::URLCACHE_SQLITE);
-	$crawler->setWorkingDirectory("tmp/");
+	$crawler->setWorkingDirectory('tmp'.DIRECTORY_SEPARATOR);
 	$crawler->go();
 	// Output crawl report
 	$report = $crawler->getProcessReport();

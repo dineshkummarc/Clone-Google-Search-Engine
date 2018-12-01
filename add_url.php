@@ -8,7 +8,7 @@ $alreadyFoundImages = array();
 if(isset($_POST['url'])){
     $start_url = $_POST['url'];
     insertLink($start_url);
-    followLinks($start_url);
+    //followLinks($start_url);
 }
 
 function linkExists($url){
