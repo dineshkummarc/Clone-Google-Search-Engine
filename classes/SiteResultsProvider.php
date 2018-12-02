@@ -14,7 +14,7 @@ class SiteResultsProvider{
                                         ");
 */								
 		// Updated Query String according to change db structure
-        $query = $this->con->prepare("SELECT COUNT(*) as total from submit_url 
+        $query = $this->con->prepare("SELECT COUNT(*) as total from search_index 
                                         WHERE url LIKE :term OR meta_title LIKE :term OR meta_desc LIKE :term OR meta_author LIKE :term OR meta_og_title LIKE :term OR meta_og_desc LIKE :term
                                         ");
         $searchTerm = "%" . $term . "%";
