@@ -171,7 +171,14 @@ class HLCrawler extends PHPCrawler
 					$src = createLink($src, $url);
 					if(!in_array($src, $alreadyFoundImages)){
 						$alreadyFoundImages[] = $src;
-						insertImage($url, $src, $alt, $title);
+						
+						$image_exist_qry = $con->prepare("SELECT image_url FROM image_search_index WHERE image_url = '".$src."' LIMIT 1"); 
+						$image_exist_qry->execute();
+						
+						if ($image_exist_qry->rowCount() == 0){ // only add the if image do not exist.
+							insertImage($url, $src, $alt, $title);
+						}
+						unset($image_exist_qry);
 					}
 				}
 				//===============================
@@ -185,10 +192,10 @@ class HLCrawler extends PHPCrawler
 						//$crawling = $url; // Do not need this.
 						
 						
-						$last_date_crawled = $con->prepare("SELECT id, last_date_crawled, hash FROM search_index WHERE url = '".$url."' ORDER BY last_date_crawled DESC LIMIT 1"); 
-						$last_date_crawled->execute();
+						$chk_last_date_qry = $con->prepare("SELECT id, last_date_crawled, hash FROM search_index WHERE url = '".$url."' ORDER BY last_date_crawled DESC LIMIT 1"); 
+						$chk_last_date_qry->execute();
 						
-						if($last_date_crawled->rowCount() == 0){
+						if($chk_last_date_qry->rowCount() == 0){
 							// Add New URL
 							addURL($url, $meta_info);
 						}
@@ -196,12 +203,13 @@ class HLCrawler extends PHPCrawler
 							// Existing Site
 							// Add URL if older than 14 days
 							
-							while ($last_date_crawled_result = $last_date_crawled->fetch(PDO::FETCH_OBJ)){
-								if (strtotime($last_date_crawled_result->last_date_crawled) < strtotime('-'.DAYS_OLD.' days')){
+							while ($last_date_crawled_result = $chk_last_date_qry->fetch(PDO::FETCH_OBJ)){
+								if (strtotime($last_date_crawled_result->chk_last_date_qry) < strtotime('-'.DAYS_OLD.' days')){
 									addURL($url, $meta_info);
 								}
 							}
 						}
+						unset($chk_last_date_qry);
 						
 					} 
 					
@@ -304,15 +312,24 @@ function addURL($url, $meta_info){
 			$query = $con->prepare("INSERT INTO search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0, 100)."', url = '".$url."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."', date_crawled=NOW()");
 		
 			$query->execute();
+			unset($query);
+			
+			$upd_crawled_status = $con->prepare("UPDATE user_submitted_urls SET is_crawled='1' WHERE url='".$url."'");
+			$upd_crawled_status->execute();
+			unset($upd_crawled_status);
 
         } else {
 			
 			
 			$query = $con->prepare("UPDATE search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0,100)."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."' WHERE url = '".$url."'");
-			
-			
-			
 			$query->execute();
+			
+			unset($query);
+			
+			$upd_crawled_status = $con->prepare("UPDATE user_submitted_urls SET is_crawled='1' WHERE url='".$url."'");
+			$upd_crawled_status->execute();
+			
+			unset($upd_crawled_status);
         }
 	}
 	else{
