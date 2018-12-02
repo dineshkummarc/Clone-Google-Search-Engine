@@ -90,17 +90,17 @@ class SiteResultsProvider{
 									</a>
 								</h3>
 							</div>";*/
-			$resultsHtml .= "<div class='result' style='margin-bottom: 20px;'>
+			$resultsHtml .= "<div class='r-row' style='margin-bottom: 20px;'>
 								<div class='r-title'>
-									<h3 style='font-size:20px;margin-bottom: 0; margin-top: 0;'><a href='#'>{$meta_title} - {$site_name}</a></h3>
+									<h3 style='font-size:20px;margin-bottom: 0; margin-top: 0;'><a href='{$url}' class='result' data-linkId='{$id}'>{$meta_title} - {$site_name}</a></h3>
 								</div><!-- End r-title -->
 								<div class='r-link'>
-									<cite style='font-style:normal; color:#006d21;'>{$url}</cite>
+									<cite style='font-style:normal; color:#006d21;' class='url'>{$url}</cite>
 								</div><!-- End r-link -->
 								<div class='r-summary'>
 									".(isset($meta_description) && $meta_description !=""? "<p><span>{$last_date_crawled} </span> - {$meta_description}</p>":"")."
 								</div><!-- End r-summary -->
-							</div><!-- End Result -->";
+							</div><!-- End r-row -->";
 							
 
         }
