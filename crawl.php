@@ -1,6 +1,8 @@
 <?php
 set_time_limit(0);
-DEFINE ('MAX_FILE_SIZE', 100000000);
+ini_set("memory_limit","1024M");
+//DEFINE ('MAX_FILE_SIZE', 100000000);
+DEFINE ('MAX_FILE_SIZE', 1048576000);
 # Do not crawl pages that are already crawled within 14 days. 
 # This is just a security check to ensure our crawler don't visit the same page within specified number of days.
 DEFINE ('DAYS_OLD', '14'); 
