@@ -55,6 +55,10 @@ class SiteResultsProvider{
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $id = $row["id"];
             $url = $row["url"];
+			$meta_title = (isset($row["meta_title"]) && $row["meta_title"]!=""? $row["meta_title"]:$row["meta_og_title"]);
+			$meta_description = (isset($row["meta_desc"]) && $row["meta_desc"]!=""? $row["meta_desc"]:$row["meta_og_desc"]);
+			$site_name = $row["meta_og_site_name"];
+			$last_date_crawled = date("jS F, Y", strtotime($row["last_date_crawled"]));
 			/*
 				Commenting out unsed variable in current code starting here
 			*/
@@ -79,13 +83,25 @@ class SiteResultsProvider{
 			*/
 
 			// Updated resultsHtml output according to response.
-			$resultsHtml .= "<div class='resultContainer'>
+			/*$resultsHtml .= "<div class='resultContainer'>
 								<h3 class='title'>
 									<a class='result' href='$url' data-linkId='$id'>
 										<span class='url'>$url</span>
 									</a>
 								</h3>
-							</div>";
+							</div>";*/
+			$resultsHtml .= "<div class='result' style='margin-bottom: 20px;'>
+								<div class='r-title'>
+									<h3 style='font-size:20px;margin-bottom: 0; margin-top: 0;'><a href='#'>{$meta_title} - {$site_name}</a></h3>
+								</div><!-- End r-title -->
+								<div class='r-link'>
+									<cite style='font-style:normal; color:#006d21;'>{$url}</cite>
+								</div><!-- End r-link -->
+								<div class='r-summary'>
+									".(isset($meta_description) && $meta_description !=""? "<p><span>{$last_date_crawled} </span> - {$meta_description}</p>":"")."
+								</div><!-- End r-summary -->
+							</div><!-- End Result -->";
+							
 
         }
         $resultsHtml .= "</div>";
