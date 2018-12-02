@@ -5,9 +5,9 @@ class ImageResultsProvider {
         $this->con = $con;
     }
     public function getNumResults($term){
-        $query = $this->con->prepare("SELECT COUNT(*) as total from images 
+        $query = $this->con->prepare("SELECT COUNT(*) as total from image_search_index 
                                         WHERE (title LIKE :term
-                                        OR alt LIKE :term)
+                                        OR alt LIKE :term OR image_url LIKE :term)
                                         AND broken = 0");
         $searchTerm = "%" . $term . "%";
         $query->bindParam(":term", $searchTerm);
@@ -22,9 +22,9 @@ class ImageResultsProvider {
         //page 2 : ( 2 - 1 ) * 20 = 20
         //page 3 : ( 3 - 1 ) * 20 = 40
 
-        $query = $this->con->prepare("SELECT * from images 
+        $query = $this->con->prepare("SELECT * from image_search_index 
                                         WHERE (title LIKE :term
-                                        OR alt LIKE :term)
+                                        OR alt LIKE :term OR image_url LIKE :term)
                                         AND broken = 0
                                         ORDER BY clicks DESC
                                         LIMIT :fromLimit, :pageSize ");
@@ -40,8 +40,8 @@ class ImageResultsProvider {
         while($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $count++;
             $id = $row["id"];
-            $imageUrl = $row["imageUrl"];
-            $siteUrl = $row["siteUrl"];
+            $imageUrl = $row["image_url"];
+            $siteUrl = $row["site_url"];
             $title = $row["title"];
             $alt = $row["alt"];
             if($title){
