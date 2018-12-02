@@ -225,6 +225,13 @@ function crawl($url)
 	$crawler = new HLCrawler();
 	$crawler->setURL($url);
 	$crawler->addContentTypeReceiveRule('#text/html#');
+	$crawler->addContentTypeReceiveRule('#image/jpg#');
+	$crawler->addContentTypeReceiveRule('#image/png#');
+	$crawler->addContentTypeReceiveRule('#image/gif#');
+	$crawler->addContentTypeReceiveRule('#image/jpeg#');
+	$crawler->addContentTypeReceiveRule('#image/svg#');
+	$crawler->addContentTypeReceiveRule('#image/bmp#');
+	$crawler->addContentTypeReceiveRule('#image/webp#');
 	$crawler->addURLFilterRule('#(jpg|gif|png|pdf|jpeg|svg|css|js|avi|mov|dat|exe|mp4|mp3|flv)$# i');
 	if (!isset($GLOBALS['bgFull'])) {
 		//$crawler->setTrafficLimit(2000 * 1024);
@@ -292,14 +299,14 @@ function addURL($url, $meta_info){
 		//var_dump($meta_info_cleaned);
 		if (!linkExists($url)) {
 			
-			$query = $con->prepare("INSERT INTO search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0, 50)."', url = '".$url."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."', date_crawled=NOW()");
+			$query = $con->prepare("INSERT INTO search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0, 100)."', url = '".$url."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."', date_crawled=NOW()");
 		
 			$query->execute();
 
         } else {
 			
 			
-			$query = $con->prepare("UPDATE search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0,50)."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."' WHERE url = '".$url."'");
+			$query = $con->prepare("UPDATE search_index SET meta_title='".getExcerpt($meta_info_cleaned['meta_title'],0,100)."', meta_desc = '".getExcerpt($meta_info_cleaned['meta_desc'],0, 200)."', meta_og_locale = '".$meta_info_cleaned['meta_og_locale']."', meta_og_type = '".$meta_info_cleaned['meta_og_type']."', meta_og_title = '".$meta_info_cleaned['meta_og_title']."', meta_og_desc = '".getExcerpt($meta_info_cleaned['meta_og_desc'],0, 200)."', meta_og_site_name = '".$meta_info_cleaned['meta_og_site_name']."', meta_og_lat = '".$meta_info_cleaned['meta_og_lat']."', meta_og_lon = '".$meta_info_cleaned['meta_og_lon']."', meta_og_st_ad = '".$meta_info_cleaned['meta_og_st_ad']."', meta_og_loc = '".$meta_info_cleaned['meta_og_loc']."', meta_og_region = '".$meta_info_cleaned['meta_og_region']."', meta_og_post_c = '".$meta_info_cleaned['meta_og_post_c']."', meta_og_country = '".$meta_info_cleaned['meta_og_country']."' WHERE url = '".$url."'");
 			
 			
 			
