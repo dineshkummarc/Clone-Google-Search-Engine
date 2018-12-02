@@ -8,7 +8,7 @@ $(document).ready(function() {
         }
         increaseLinkClicks(id, url);
         return false;
-    })
+    });
     let grid = $(".imageResults");
     grid.on("layoutComplete", function() {
         $(".gridItem img").css("visibility", "visible")
