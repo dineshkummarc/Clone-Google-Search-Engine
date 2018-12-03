@@ -22,7 +22,7 @@ $(document).ready(function() {
     $("[data-fancybox]").fancybox({
         caption : function( instance, item ) {
             let caption = $(this).data('caption') || '';
-            let siteUrl = $(this).data('siteUrl') || '';
+            let siteUrl = $(this).data('siteurl') || '';
             if ( item.type === 'image' ) {
                 caption = (caption.length ? caption + '<br />' : '')
                     + '<a href="' + item.src + '">View image</a><br>'
