@@ -211,7 +211,10 @@ class HLCrawler extends PHPCrawler
 						}
 						unset($chk_last_date_qry);
 						
-					} 
+					}
+					$upd_crawled_status = $con->prepare("UPDATE user_submitted_urls SET is_crawled='1' WHERE url='".$url."'");
+					$upd_crawled_status->execute();
+					unset($upd_crawled_status);
 					
 				}
 				
@@ -325,11 +328,7 @@ function addURL($url, $meta_info){
 			$query->execute();
 			
 			unset($query);
-			
-			$upd_crawled_status = $con->prepare("UPDATE user_submitted_urls SET is_crawled='1' WHERE url='".$url."'");
-			$upd_crawled_status->execute();
-			
-			unset($upd_crawled_status);
+
         }
 	}
 	else{
