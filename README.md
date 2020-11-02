@@ -1,4 +1,4 @@
-# Clone-Google-Search-Engine
+# phpmySearchEngine
 Clone Google Search Engine using PHP PDO + OOP<br>
 backend: PHP<br>
 front-end: css + jquery + masonry + fancybox<br><br>
